@@ -679,6 +679,1362 @@ function updateDiscountPreview(id,val){
         <button class="btn-primary" id="searchBtn">ÜRÜNÜ BUL</button>
         <div class="step-label">[İşlem 1.2] Kalıcı Hafıza JSON Yükleme</div>
         <div class="btn-update-container">
+            <label style="display:inline-block; background-color:#6c757d; color:white; padding:6px 12px; font-size:11px; border-radius:4px; cursor:pointer; font-weight:bold;">
+                Listeyi Güncelle (.json)
+                <input type="file" accept=".json" onchange="processJsonUpload(event)" style="position:absolute; left:-9999px; opacity:0; width:1px; height:1px;">
+            </label>
+        </div>
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="col-kodlar">KODLAR</th>
+                        <th class="col-urun">ÜRÜN</th>
+                        <th class="col-euro">EURO</th>
+                        <th class="col-islem">İŞLEM</th>
+                    </tr>
+                </thead>
+                <tbody id="productTableBody"></tbody>
+            </table>
+            <div id="noDataPlaceholder" class="no-data-msg" style="display:none;">Kriterlere uyan ürün bulunamadı.</div>
+        </div>
+    </div>
+
+    <!-- SAYFA 2 -->
+    <div id="page2" class="content-page">
+        <div class="page-info">Sayfa 2: Sepetiniz</div>
+        <div class="step-label">[İşlem 2.1] Sepet Kontrolü ve Hesaplama Ekranına Gönderim</div>
+        <div id="basketItemsContainer" style="padding: 5px;"></div>
+        <div id="emptyBasketMsg" class="placeholder-page">Sepetiniz şu anda boş.</div>
+    </div>
+
+    <!-- SAYFA 3 -->
+    <div id="page3" class="content-page">
+        <div class="page-info">Sayfa 3: Hesaplama Ekranı</div>
+        <div id="rateBlock" class="rate-container">
+            <div>
+                <span style="font-size: 11px; font-weight: bold; color: #003a70; display:block;">TCMB Günlük Euro Kuru:</span>
+                <input type="number" id="euroRateInput" class="rate-input" value="53.59" step="0.01" oninput="triggerRecalculation()">
+            </div>
+            <button class="btn-tcmb-link" onclick="openTCMBPage()">TCMB Kuru Kontrol Et</button>
+        </div>
+
+        <div class="action-mode-group">
+            <button id="modeBtn-satis" class="btn-mode active" onclick="setActionMode('satis')">Satış</button>
+            <button id="modeBtn-proforma" class="btn-mode" onclick="setActionMode('proforma')">Proforma</button>
+            <button id="modeBtn-teklif" class="btn-mode" onclick="setActionMode('teklif')">Fiyat Teklifi</button>
+        </div>
+
+        
+<div style="background:#eef2f7;padding:8px;border-radius:6px;margin-bottom:10px;">
+<label style="font-size:11px;font-weight:bold;">Hedef Satış Fiyatı (TL)</label>
+<input type="number" id="targetPriceInput" class="rate-input" style="margin-left:8px;" oninput="calculateTargetDiscount()">
+<span id="targetResult" style="font-size:11px;margin-left:8px;"></span>
+</div>
+<div class="step-label">[İşlem 3.2] Adet, İskonto Girişi ve Satır Yönetimi</div>
+        <div id="calculationContainer" style="padding: 5px;"></div>
+        <div id="emptyCalcMsg" class="placeholder-page" style="display: block;">Yeni hesaplanacak ürünü bekliyor... Sepetten ürün ekleyin.</div>
+        <button id="btnGrandCalc" class="btn-grand-calc" style="display: none;" onclick="executeMainCalculation()">HESAPLA ↓</button>
+
+        <div id="sortedListSection" style="display: none;">
+            <div id="sortedDynamicHeader" class="sorted-header">Fiyat Teklifi Sonuçları</div>
+            <div id="sortedItemsContainer" style="padding: 5px;"></div>
+        </div>
+
+        <div id="overallTotalBlock" class="calc-total-summary" style="display: none;">
+            <div>Genel Toplam: <span id="grandTotalValue">0.00</span> €</div>
+            <div class="tl-text">TL Karşılığı: <span id="grandTotalTLValue">0.00</span> ₺</div>
+        </div>
+
+        <div id="btnTransferWrapper" style="display:none; margin-top: 10px;">
+            <button class="btn-grand-calc" style="background-color: #003a70;" onclick="transferToPage4()">4. SAYFAYA AKTAR →</button>
+        </div>
+    </div>
+
+    <!-- SAYFA 4 -->
+    <div id="page4" class="content-page">
+        <div class="step-label">[İşlem 4.1] Şablon Önizleme, Kopyalama ve Paylaşım</div>
+        
+        <div class="customer-input-panel">
+            <div class="customer-field-group">
+                <label for="custNameInput">Müşteri Adı:</label>
+                <input type="text" id="custNameInput" class="customer-input" value="HİTİT MAKİNA - ÇORUM" oninput="generateCommunicationData()">
+            </div>
+            <div class="customer-row-fields">
+                <div class="customer-field-group">
+                    <label for="custVadeInput">Vade:</label>
+                    <input type="text" id="custVadeInput" class="customer-input" value="45 gün" oninput="generateCommunicationData()">
+                </div>
+                <div class="customer-field-group">
+                    <label for="custFaturaInput">Fatura Türü:</label>
+                    <input type="text" id="custFaturaInput" class="customer-input" value="EURO fatura" oninput="generateCommunicationData()">
+                </div>
+            </div>
+        </div>
+
+        <div id="emptyCommMsg" class="placeholder-page" style="display: block;">Paylaşılacak hesaplanmış bir döküm bulunamadı. Lütfen önce 3. sayfada hesaplama yapın.</div>
+        
+        <div id="communicationBlock" class="communication-box" style="display: none;">
+            <div class="comm-header">Müşteri Paylaşım Paneli</div>
+            <textarea id="emailTemplateTextarea" class="text-preview-area" readonly></textarea>
+            
+            <button class="btn-copy-action" onclick="copyEmailText()">Metni Kopyala</button>
+            <button class="btn-email-action" onclick="sendDirectEmail()">E-Posta Gönder</button>
+            <button class="btn-whatsapp" onclick="sendWhatsAppMessage()">WhatsApp İle Gönder</button>
+        </div>
+    </div>
+
+    <div class="bottom-nav-bar">
+        <button id="prevBarBtn" class="nav-arrow-btn" onclick="navigatePage(-1)">< GERİ</button>
+        <button id="nextBarBtn" class="nav-arrow-btn" onclick="navigatePage(1)">İLERİ ></button>
+    </div>
+</div>
+
+<script>
+    let globalProductCatalog = [];
+    let basket = [];
+    let selectedCalculationItems = []; 
+    let finalCalculatedList = [];       
+    let currentActionMode = "satis"; 
+    let activeCurrentPage = 1; 
+    const STORAGE_KEY = "wemosa_persistent_catalog";
+
+    const demoCatalog = [
+        {"berta": "11002400", "abas": "10000047", "name": "Çinko Sprey özel açık 400ml", "price": "12.26"},
+        {"berta": "10050005", "abas": "10000020", "name": "Plastik-Metal B Reçine 0,5 kg", "price": "36.28"}
+    ];
+
+    document.addEventListener("DOMContentLoaded", function() {
+        loadCatalogFromMemory();
+        document.getElementById('searchBtn').addEventListener('click', performFilter);
+        document.getElementById('searchInput').addEventListener('input', performFilter);
+        document.getElementById('jsonFileInput').addEventListener('change', processJsonUpload);
+        updateBottomNavButtons();
+    });
+
+    function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.innerText = message;
+        toast.classList.add("show");
+        setTimeout(() => { toast.classList.remove("show"); }, 2000);
+    }
+
+    function navigatePage(direction) {
+        let targetPage = activeCurrentPage + direction;
+        if (targetPage >= 1 && targetPage <= 4) {
+            switchTab(targetPage);
+        }
+    }
+
+    function updateBottomNavButtons() {
+        document.getElementById('prevBarBtn').disabled = (activeCurrentPage === 1);
+        document.getElementById('nextBarBtn').disabled = (activeCurrentPage === 4);
+    }
+
+    function setActionMode(mode) {
+        currentActionMode = mode;
+        document.querySelectorAll('.action-mode-group .btn-mode').forEach(b => b.classList.remove('active'));
+        document.getElementById(`modeBtn-${mode}`).classList.add('active');
+
+        const sortedHeader = document.getElementById('sortedDynamicHeader');
+        if (mode === 'satis') sortedHeader.innerText = "Satış Belgesi Sonuçları";
+        if (mode === 'proforma') sortedHeader.innerText = "Proforma Fatura Sonuçları";
+        if (mode === 'teklif') sortedHeader.innerText = "Fiyat Teklifi Sonuçları";
+
+        if(finalCalculatedList.length > 0) {
+            renderSortedList();
+        }
+        showToast("Mod Değiştirildi");
+    }
+
+    function switchTab(pageNum) {
+        activeCurrentPage = pageNum; 
+        updateBottomNavButtons();
+
+        document.querySelectorAll('.content-page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+        
+        document.getElementById(`page${pageNum}`).classList.add('active');
+        
+        if (pageNum === 1) document.getElementById('tabBtn1').classList.add('active');
+        if (pageNum === 2) document.getElementById('basketTabBtn').classList.add('active');
+        if (pageNum === 3) document.getElementById('tabBtn3').classList.add('active');
+        if (pageNum === 4) document.getElementById('tabBtn4').classList.add('active');
+
+        if(pageNum === 2){
+            renderBasket();
+            const s=document.getElementById('searchInput');
+            if(s) s.value='';
+            const tb=document.getElementById('productTableBody');
+            if(tb) tb.innerHTML='';
+        }
+        if(pageNum === 3) renderCalculationPage();
+        if(pageNum === 4) generateCommunicationData();
+        if(pageNum === 1) performFilter(); 
+    }
+
+    function loadCatalogFromMemory() {
+        const storedData = localStorage.getItem(STORAGE_KEY);
+        if (storedData) {
+            try { globalProductCatalog = JSON.parse(storedData); } catch (e) { globalProductCatalog = demoCatalog; }
+        } else {
+            globalProductCatalog = demoCatalog;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(demoCatalog));
+        }
+        performFilter();
+    }
+
+    function processJsonUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const parsedJson = JSON.parse(e.target.result);
+                if (Array.isArray(parsedJson)) {
+                    globalProductCatalog = parsedJson;
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsedJson));
+                    showToast("Ürün listesi kalıcı hafızaya yüklendi.");
+                    performFilter();
+                } else { showToast("Hata: Geçersiz JSON listesi."); }
+            } catch (err) { showToast("JSON dosyası ayrıştırılamadı."); }
+        };
+        reader.readAsText(file);
+    }
+
+    function loadFromPaste() {
+        const text = document.getElementById('jsonPasteArea').value.trim();
+        if (!text) { showToast("Lütfen JSON içeriği yapıştırın."); return; }
+        try {
+            const parsedJson = JSON.parse(text);
+            if (Array.isArray(parsedJson)) {
+                globalProductCatalog = parsedJson;
+                try { localStorage.setItem(STORAGE_KEY, JSON.stringify(parsedJson)); } catch(e) {}
+                document.getElementById('jsonPastePanel').style.display = 'none';
+                document.getElementById('jsonPasteArea').value = '';
+                showToast("✓ " + parsedJson.length + " ürün yüklendi!");
+                performFilter();
+            } else { showToast("Hata: JSON bir dizi ([ ]) olmalı."); }
+        } catch (err) { showToast("Geçersiz JSON formatı. Kontrol edin."); }
+    }
+
+    function performFilter() {
+        const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+        const tableBody = document.getElementById('productTableBody');
+        const placeholder = document.getElementById('noDataPlaceholder');
+        
+        tableBody.innerHTML = "";
+
+        if (!globalProductCatalog || globalProductCatalog.length === 0) {
+            placeholder.style.display = "block";
+            return;
+        }
+
+        const matches = globalProductCatalog.filter(item => {
+            const bertaVal = (item.berta || item.BERTA || '').toString().toLowerCase();
+            const abasVal = (item.abas || item.ABAS || '').toString().toLowerCase();
+            const nameVal = (item.name || item.NAME || item.urun || item.ÜRÜN || item.urunadi || '').toString().toLowerCase();
+            return bertaVal.includes(searchInput) || abasVal.includes(searchInput) || nameVal.includes(searchInput);
+        });
+
+        if (matches.length === 0) {
+            placeholder.style.display = "block";
+            return;
+        }
+        placeholder.style.display = "none";
+
+        matches.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            let bertaText = item.berta || item.BERTA || '';
+            let abasText = item.abas || item.ABAS || '';
+            let nameText = item.name || item.NAME || item.urun || item.ÜRÜN || item.urunadi || '';
+            let priceText = item.price || item.PRICE || item.euro || item.EURO || item.fiyat || '0';
+
+            if (bertaText.toString().toLowerCase() === 'nan') bertaText = '';
+            if (abasText.toString().toLowerCase() === 'nan') abasText = '';
+            if (nameText.toString().toLowerCase() === 'nan') nameText = '';
+            
+            let cleanPriceNum = 0;
+            if(priceText) {
+                let cleanStr = priceText.toString().replace(/[^\d.,]/g, '').replace(',', '.');
+                let parsed = parseFloat(cleanStr);
+                cleanPriceNum = isNaN(parsed) ? 0 : parsed;
+            }
+
+            const itemID = bertaText || abasText || index;
+            const safeNameText = nameText.replace(/'/g, "\\'");
+
+            tr.innerHTML = `
+                <td>
+                    <div class="kod-container">
+                        <span class="kod-b">B:</span> ${bertaText}<br>
+                        <span class="kod-a">A:</span> ${abasText}
+                    </div>
+                </td>
+                <td class="product-cell">${nameText}</td>
+                <td><span class="price-tag">${cleanPriceNum.toFixed(2)} €</span></td>
+                <td>
+                    <button class="btn-add" onclick="addToBasket('${itemID}', '${safeNameText}', ${cleanPriceNum}, '${bertaText}', '${abasText}')">Ekle</button>
+                </td>
+            `;
+            tableBody.appendChild(tr);
+        });
+    }
+
+    function addToBasket(id, name, price, berta, abas) {
+        const existingItem = basket.find(i => i.id === id);
+        if (existingItem) {
+            showToast("Ürün zaten sepette.");
+            return;
+        }
+        basket.push({ id, name, price: parseFloat(price) || 0, berta, abas, quantity: 1, sentToCalc: false });
+        updateBasketCount();
+
+        document.querySelectorAll('.btn-add').forEach(btn=>{
+            if(btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(id)){
+                btn.classList.add('added');
+                btn.innerText='EKLENDİ';
+            }
+        });
+
+        showToast(name + " sepete eklendi.");
+    }
+
+    function updateBasketCount() {
+        const totalItems = basket.reduce((total, item) => total + item.quantity, 0);
+        document.getElementById('basketTabBtn').innerText = `Sepet (${totalItems})`;
+    }
+
+    function removeFromBasket(id) {
+        basket = basket.filter(item => item.id !== id);
+        selectedCalculationItems = selectedCalculationItems.filter(item => item.id !== id);
+        updateBasketCount();
+        renderBasket();
+        showToast("Ürün sepetten kaldırıldı.");
+    }
+
+    function renderBasket() {
+        const container = document.getElementById('basketItemsContainer');
+        const emptyMsg = document.getElementById('emptyBasketMsg');
+        container.innerHTML = "";
+
+        if (basket.length === 0) {
+            emptyMsg.style.display = "block";
+            return;
+        }
+        emptyMsg.style.display = "none";
+
+        basket.forEach(item => {
+            const div = document.createElement('div');
+            div.className = "list-item-block";
+            const safeNameText = item.name.replace(/'/g, "\\'");
+
+            const buttonClass = item.sentToCalc ? "btn-calculate-action sent-status" : "btn-calculate-action";
+            const buttonText = item.sentToCalc ? "Gönderildi" : "Hesapla";
+
+            div.innerHTML = `
+                <button class="btn-item-remove" onclick="removeFromBasket('${item.id}')">Sil</button>
+                <div class="basket-item-flex">
+                    <div>
+                        <div class="list-item-header">${item.name} (Adet: ${item.quantity})</div>
+                        <div class="kod-container" style="margin-bottom: 5px;">
+                            <span class="kod-b">B:</span> ${item.berta || '-'} | <span class="kod-a">A:</span> ${item.abas || '-'}
+                        </div>
+                        <div>Birim Fiyat: <span class="price-tag">${item.price.toFixed(2)} €</span></div>
+                    </div>
+                    <div>
+                        <button id="btnBasket-${item.id}" class="${buttonClass}" onclick="sendToCalculationPage('${item.id}', '${safeNameText}', ${item.price}, '${item.berta}', '${item.abas}', ${item.quantity})">${buttonText}</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function sendToCalculationPage(id, name, price, berta, abas, qty) {
+        const basketItem = basket.find(i => i.id === id);
+        const isAlreadySelected = selectedCalculationItems.find(i => i.id === id);
+        
+        if (!isAlreadySelected) {
+            selectedCalculationItems.push({
+                id: id, name: name, price: parseFloat(price) || 0, berta: berta, abas: abas, quantity: qty, discount: 0
+            });
+
+            if(basketItem) basketItem.sentToCalc = true;
+            
+            const btn = document.getElementById(`btnBasket-${id}`);
+            if(btn) {
+                btn.className = "btn-calculate-action sent-status";
+                btn.innerText = "Gönderildi";
+            }
+
+            showToast(`${name} hesaplama ekranına gönderildi.`);
+        } else {
+            showToast("Ürün zaten aktif hesaplama listesinde.");
+        }
+    }
+
+    function removeActiveCalcItem(id) {
+        selectedCalculationItems = selectedCalculationItems.filter(item => item.id !== id);
+        const basketItem = basket.find(i => i.id === id);
+        if(basketItem) basketItem.sentToCalc = false;
+        renderCalculationPage();
+        showToast("Ürün listeden kaldırıldı.");
+    }
+
+    function renderCalculationPage() {
+        const container = document.getElementById('calculationContainer');
+        const emptyMsg = document.getElementById('emptyCalcMsg');
+        const grandBtn = document.getElementById('btnGrandCalc');
+        
+        container.innerHTML = "";
+
+        if (selectedCalculationItems.length === 0) {
+            emptyMsg.style.display = "block";
+            grandBtn.style.display = "none";
+        } else {
+            emptyMsg.style.display = "none";
+            grandBtn.style.display = "block";
+
+            selectedCalculationItems.forEach((item, index) => {
+                const itemBox = document.createElement('div');
+                itemBox.className = "list-item-block";
+                
+                itemBox.innerHTML = `
+                    <button class="btn-item-remove" onclick="removeActiveCalcItem('${item.id}')">Kaldır</button>
+                    <div class="list-item-header">${item.name}</div>
+                    <div class="kod-container">
+                        <span class="kod-b">B:</span> ${item.berta || '-'} | <span class="kod-a">A:</span> ${item.abas || '-'} | Liste: <strong>${item.price.toFixed(2)} €</strong>
+                    </div>
+                    <div class="calc-row">
+                        <label style="font-size:11px;">Adet:</label>
+                        <input type="number" class="calc-input" value="${item.quantity}" min="1" onchange="updateRowCalculation(${index}, 'qty', this.value)">
+                        
+                        <label style="font-size:11px; margin-left:5px;">İskonto (%):</label>
+                        <input type="number" class="calc-input" value="${item.discount}" min="0" max="100" onchange="updateRowCalculation(${index}, 'disc', this.value)">
+                        
+                        <span class="calc-output-text" id="rowTotal-${index}">0.00 €<span class="calc-output-try">0.00 ₺</span></span>
+                    </div>
+                `;
+                container.appendChild(itemBox);
+                calculateRowTotal(index);
+            });
+        }
+
+        renderSortedList();
+        calculateGrandTotal();
+    }
+
+    function updateRowCalculation(index, type, value) {
+        if (type === 'qty') selectedCalculationItems[index].quantity = parseInt(value) || 1;
+        if (type === 'disc') selectedCalculationItems[index].discount = parseFloat(value) || 0;
+        calculateRowTotal(index);
+    }
+
+    function calculateRowTotal(index) {
+        const item = selectedCalculationItems[index];
+        if (!item) return;
+        const rate = parseFloat(document.getElementById('euroRateInput').value) || 1;
+        
+        const baseTotalEUR = item.price * item.quantity;
+        const discountedTotalEUR = baseTotalEUR - (baseTotalEUR * (item.discount / 100));
+        const discountedTotalTRY = discountedTotalEUR * rate;
+        
+        const element = document.getElementById(`rowTotal-${index}`);
+        if(element) {
+            element.innerHTML = `
+                ${discountedTotalEUR.toFixed(2)} €
+                <span class="calc-output-try">${discountedTotalTRY.toFixed(2)} ₺</span>
+            `;
+        }
+    }
+
+    function executeMainCalculation() {
+        if (selectedCalculationItems.length === 0) return;
+
+        selectedCalculationItems.forEach(item => {
+            const existing = finalCalculatedList.find(f => f.id === item.id);
+            if (!existing) {
+                finalCalculatedList.push({ ...item });
+            } else {
+                existing.quantity = item.quantity;
+                existing.discount = item.discount;
+            }
+            const basketItem = basket.find(i => i.id === item.id);
+            if(basketItem) basketItem.sentToCalc = false;
+        });
+
+        finalCalculatedList.sort((a, b) => {
+            const totalA = (a.price * a.quantity) - ((a.price * a.quantity) * (a.discount / 100));
+            const totalB = (b.price * b.quantity) - ((b.price * b.quantity) * (b.discount / 100));
+            return totalB - totalA; 
+        });
+
+        selectedCalculationItems = [];
+
+        renderCalculationPage();
+        showToast("Hesaplandı ✓");
+    }
+
+    function removeFinalItem(id) {
+        finalCalculatedList = finalCalculatedList.filter(item => item.id !== id);
+        const basketItem = basket.find(i => i.id === id);
+        if(basketItem) basketItem.sentToCalc = false;
+        renderSortedList();
+        calculateGrandTotal();
+        showToast("Ürün listeden silindi.");
+    }
+
+    function updateFinalItem(id, type, value) {
+        const item = finalCalculatedList.find(i => i.id === id);
+        if (!item) return;
+        if (type === 'qty') item.quantity = Math.max(1, parseInt(value) || 1);
+        if (type === 'disc') {
+            let d = parseFloat(value) || 0;
+            if (d < 0) d = 0;
+            if (d > 100) d = 100;
+            item.discount = d;
+        }
+        renderSortedList();
+        calculateGrandTotal();
+    }
+
+    function renderSortedList() {
+        const sortedContainer = document.getElementById('sortedItemsContainer');
+        const sortedSection = document.getElementById('sortedListSection');
+        const rate = parseFloat(document.getElementById('euroRateInput').value) || 1;
+
+        if (finalCalculatedList.length === 0) {
+            sortedSection.style.display = "none";
+            return;
+        }
+
+        sortedContainer.innerHTML = "";
+        sortedSection.style.display = "block";
+
+        finalCalculatedList.forEach((item, idx) => {
+            const listeFiyati = item.price;
+            const iskontoOrani = item.discount;
+            const iskontoluBirimFiyat = listeFiyati - (listeFiyati * (iskontoOrani / 100));
+            
+            const toplamEUR = iskontoluBirimFiyat * item.quantity;
+            const toplamTRY = toplamEUR * rate;
+
+            const div = document.createElement('div');
+            div.className = "list-item-block";
+            div.style.borderLeft = "4px solid #ff9900"; 
+            
+            div.innerHTML = `
+                <button class="btn-item-remove" onclick="removeFinalItem('${item.id}')">Sil</button>
+                <div class="list-item-header" style="color:#003a70; padding-right:50px;">${item.name}</div>
+                <div class="kod-container" style="margin-bottom: 6px;">
+                    <span class="kod-b">B:</span> ${item.berta || '-'} | <span class="kod-a">A:</span> ${item.abas || '-'} | Liste: <strong>${listeFiyati.toFixed(2)} €</strong>
+                </div>
+                <div class="calc-row" style="margin-bottom:6px;">
+                    <label style="font-size:11px;">Adet:</label>
+                    <input type="number" class="calc-input" value="${item.quantity}" min="1"
+                        oninput="updateFinalItem('${item.id}', 'qty', this.value)">
+                    <label style="font-size:11px; margin-left:5px;">İskonto (%):</label>
+                    <input type="number" class="calc-input" value="${iskontoOrani}" min="0" max="100"
+                        oninput="updateFinalItem('${item.id}', 'disc', this.value)">
+                </div>
+                <div class="report-detail-line">
+                    İsk. Birim Fiyat: <span style="color:#003a70; font-weight:bold;" id="finalNetPrice-${item.id}">${iskontoluBirimFiyat.toFixed(2)} €</span>
+                </div>
+                <div style="display: flex; justify-content: flex-end; align-items: baseline; gap: 8px; margin-top: 6px;">
+                    <span style="font-size: 11px; color: #666; font-weight: bold;">TUTAR:</span>
+                    <span style="font-size: 18px; font-weight: 900; color: #003a70;" id="finalTotalEUR-${item.id}">${toplamEUR.toFixed(2)} €</span>
+                    <span style="font-size: 14px; font-weight: bold; color: #28a745;" id="finalTotalTRY-${item.id}">${toplamTRY.toFixed(2)} ₺</span>
+                </div>
+            `;
+            sortedContainer.appendChild(div);
+        });
+    }
+
+    function calculateGrandTotal() {
+        const totalBlock = document.getElementById('overallTotalBlock');
+        const transferWrapper = document.getElementById('btnTransferWrapper');
+        const rate = parseFloat(document.getElementById('euroRateInput').value) || 1;
+
+        if (finalCalculatedList.length === 0 && selectedCalculationItems.length === 0) {
+            totalBlock.style.display = "none";
+            if (transferWrapper) transferWrapper.style.display = "none";
+            return;
+        }
+        totalBlock.style.display = "block";
+        if (transferWrapper) transferWrapper.style.display = (finalCalculatedList.length > 0) ? "block" : "none";
+
+        let grandTotalEUR = 0;
+
+        finalCalculatedList.forEach(item => {
+            const baseTotalEUR = item.price * item.quantity;
+            const discountedTotalEUR = baseTotalEUR - (baseTotalEUR * (item.discount / 100));
+            grandTotalEUR += discountedTotalEUR;
+        });
+
+        let grandTotalTRY = grandTotalEUR * rate;
+
+        document.getElementById('grandTotalValue').innerText = grandTotalEUR.toFixed(2);
+        document.getElementById('grandTotalTLValue').innerText = grandTotalTRY.toFixed(2);
+    }
+
+    function transferToPage4() {
+        if (finalCalculatedList.length === 0) {
+            showToast("Aktarılacak ürün yok. Önce hesaplama yapın.");
+            return;
+        }
+        switchTab(4);
+        showToast("4. Sayfaya aktarıldı!");
+    }
+
+    function triggerRecalculation() {
+        renderSortedList();
+        calculateGrandTotal();
+    }
+
+    function openTCMBPage() {
+        window.open("https://www.tcmb.gov.tr/wps/wcm/connect/tr/tcmb+tr/main+page+site+area/bugun", "_blank");
+    }
+
+    function getModeLabel() {
+        if (currentActionMode === 'satis') return "SİPARİŞ";
+        if (currentActionMode === 'proforma') return "PROFORMA FATURA";
+        return "FİYAT TEKLİFİ";
+    }
+
+    function getDynamicCustomerName() {
+        return document.getElementById('custNameInput').value.trim() || "Abdullah";
+    }
+
+    function getDynamicCustomerVade() {
+        return document.getElementById('custVadeInput').value.trim() || "30";
+    }
+
+    function getDynamicCustomerFatura() {
+        return document.getElementById('custFaturaInput').value.trim() || "TL";
+    }
+
+    // YENİ TALEBE GÖRE SADELEŞTİRİLMİŞ MAİL ŞABLON MOTORU
+    function buildRawEmailTextBody() {
+        let labelMode = getModeLabel();
+        let cName = getDynamicCustomerName();
+        let cVade = getDynamicCustomerVade();
+        let cFatura = getDynamicCustomerFatura();
+
+        let mailTemplate = `Merhaba,\n\n`;
+        mailTemplate += `Bilgilerini paylaştığım firma için ${labelMode} sürecini işleme almanızı rica ederim.\n\n`;
+        
+        // Mavi Bölge: Tam 2 satırdan oluşacak şekilde ayrıldı
+        mailTemplate += `MÜŞTERİ BİLGİLERİ:\n`;
+        mailTemplate += `--------------------------------------------------\n`;
+        mailTemplate += `Müşteri Adı: ${cName}\n`;
+        mailTemplate += `Vade: ${cVade} | Fatura Türü: ${cFatura}\n`;
+        mailTemplate += `--------------------------------------------------\n\n`;
+        
+        // Kırmızı Bölge: Ürün tablosunun karmaşık başlık satırı tamamen silindi
+        mailTemplate += `ÜRÜN LİSTESİ VE DETAYLARI:\n`;
+        mailTemplate += `--------------------------------------------------\n`;
+        
+        // Her ürün satırının sonundaki satır toplamı kaldırıldı, sadece birim fiyat bırakıldı
+        finalCalculatedList.forEach(item => {
+            const netBirim = item.price - (item.price * (item.discount / 100));
+            mailTemplate += `${item.berta || '-'} | ${item.abas || '-'} | ${item.name} | ${item.quantity} Adet | ${netBirim.toFixed(2)} €\n`;
+        });
+        
+        mailTemplate += `--------------------------------------------------\n\n`;
+        mailTemplate += `Abdullah KARAMAN`;
+        return mailTemplate;
+    }
+
+    function generateCommunicationData() {
+        const emptyMsg = document.getElementById('emptyCommMsg');
+        const commBlock = document.getElementById('communicationBlock');
+        const textarea = document.getElementById('emailTemplateTextarea');
+
+        if (finalCalculatedList.length === 0) {
+            emptyMsg.style.display = "block";
+            commBlock.style.display = "none";
+            return;
+        }
+
+        emptyMsg.style.display = "none";
+        commBlock.style.display = "flex";
+
+        let labelMode = getModeLabel();
+        let cName = getDynamicCustomerName();
+
+        let fullAreaView = `Gönderen: akaraman3406@gmail.com\n`;
+        fullAreaView += `Alıcı: ofis@weicon.com.tr\n`;
+        fullAreaView += `Konu: ${labelMode} - ${cName}\n\n`;
+        fullAreaView += buildRawEmailTextBody();
+
+        textarea.value = fullAreaView;
+    }
+
+    function sendDirectEmail() {
+        let labelMode = getModeLabel();
+        let cName = getDynamicCustomerName();
+        let emailTo = "ofis@weicon.com.tr";
+        let emailSubject = `${labelMode} - ${cName}`;
+        let emailBody = buildRawEmailTextBody();
+
+        let mailtoUrl = `mailto:${emailTo}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+        window.location.href = mailtoUrl;
+    }
+
+    function sendWhatsAppMessage() {
+        let labelMode = getModeLabel();
+        let cName = getDynamicCustomerName();
+        let cVade = getDynamicCustomerVade();
+        let cFatura = getDynamicCustomerFatura();
+        
+        let whatsappText = `*** ${labelMode} ***\n\n`;
+        whatsappText += `Merhaba,\n\n`;
+        whatsappText += `Bilgilerini paylaştığım firma için ${labelMode} sürecini işleme almanızı rica ederim.\n`;
+        whatsappText += `_____________________________________\n\n`;
+        whatsappText += `*** FİRMA BİLGİLERİ\n`;
+        whatsappText += `Müşteri Adı: ${cName}\n`;
+        whatsappText += `Vade: ${cVade} | Fatura: ${cFatura}\n`;
+        whatsappText += `_____________________________________\n\n`;
+        whatsappText += `*** ÜRÜNLER\n`;
+
+        finalCalculatedList.forEach(item => {
+            const netBirim = item.price - (item.price * (item.discount / 100));
+            whatsappText += `${item.berta || '-'} | ${item.abas || '-'} | ${item.name} | ${item.quantity} Adet | ${netBirim.toFixed(2)} €\n`;
+        });
+
+        whatsappText += `\nİyi çalışmalar.\nAbdullah KARAMAN`;
+
+        const safeUrl = "https://api.whatsapp.com/send?text=" + encodeURIComponent(whatsappText);
+        window.open(safeUrl, "_blank");
+    }
+
+    function copyEmailText() {
+        const textarea = document.getElementById('emailTemplateTextarea');
+        textarea.select();
+        textarea.setSelectionRange(0, 99999); 
+        navigator.clipboard.writeText(textarea.value);
+        showToast("Metin kopyalandı!");
+    }
+
+function calculateTargetDiscount(){
+ const tl=parseFloat(document.getElementById('targetPriceInput')?.value||0);
+ const rate=parseFloat(document.getElementById('euroRateInput')?.value||1);
+ if(!tl||finalCalculatedList.length===0){document.getElementById('targetResult').innerText='';return;}
+ let listEUR=0;
+ finalCalculatedList.forEach(i=>listEUR += (i.price*i.quantity));
+ const targetEUR=tl/rate;
+ const disc=Math.max(0,Math.min(100,(1-(targetEUR/listEUR))*100));
+ document.getElementById('targetResult').innerText='Gerekli iskonto: %'+disc.toFixed(2);
+}
+
+
+function updateDiscountPreview(id,val){
+    const item = basket.find(i=>i.id===id);
+    if(!item) return;
+    let d=parseFloat(val)||0;
+    if(d<0)d=0;if(d>100)d=100;
+    item.discount=d;
+    const net=item.price-(item.price*d/100);
+    const el=document.getElementById('netprice-'+id);
+    if(el) el.innerHTML=net.toFixed(2)+' €';
+}
+
+</script>
+
+
+<!-- V5.1 TEST SURUMU -->
+<!-- Planlanan özellikler:
+- 3.sayfada net birim fiyat gösterimi
+- Adet ve toplamın aynı satırda hesaplanması
+- Hesaplanan ürünü silme
+- Manuel fiyat müdahalesi altyapısı
+-->
+
+</body>
+</html>
+</td></tr></tbody></table>
+<!-- V5.1 TEST SURUMU -->
+<!-- Planlanan özellikler:
+- 3.sayfada net birim fiyat gösterimi
+- Adet ve toplamın aynı satırda hesaplanması
+- Hesaplanan ürünü silme
+- Manuel fiyat müdahalesi altyapısı
+-->
+
+</body></html>
+<!-- WEMOSA V5 hazırlandı: manuel fiyat altyapısı eklenecek sürüm -->
+<!-- TEST7: Renkli sekmeler ve V7 deneme sürümü -->            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .step-label {
+            display: inline-block;
+            background: #e2e8f0;
+            color: #4a5568;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .search-box-container {
+            border: 1px solid #999;
+            border-radius: 6px;
+            padding: 5px;
+            margin-bottom: 10px;
+            background: #fff;
+        }
+
+        .search-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            padding: 8px;
+            font-size: 18px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background-color: #003a70;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .btn-update-container {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 11px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        #jsonFileInput {
+            display: none;
+        }
+
+        .data-table-container {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .data-table th {
+            background-color: #003a70;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 6px 4px;
+            text-align: left;
+        }
+
+        .col-kodlar { width: 25%; }
+        .col-urun { width: 49%; }
+        .col-euro { width: 14%; }
+        .col-islem { width: 12%; }
+
+        .data-table td {
+            padding: 6px 4px;
+            font-size: 11px;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: middle;
+        }
+
+        .kod-container {
+            font-size: 10px;
+            color: #555;
+            line-height: 1.3;
+        }
+        .kod-b { color: #003a70; font-weight: bold; }
+        .kod-a { color: #d9534f; font-weight: bold; }
+
+        .product-cell {
+            font-weight: 500;
+            color: #222;
+            word-break: break-word;
+        }
+
+        .price-tag {
+            background-color: #e8f4fd;
+            color: #003a70;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .btn-add {
+            background-color: #003a70;
+            color: white;
+            border: none;
+            padding: 6px 4px;
+            font-size: 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .btn-add.added{background-color:#d9534f !important;}
+
+        .placeholder-page {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .list-item-block {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .btn-item-remove {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 3px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .basket-item-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-right: 45px;
+        }
+
+        .list-item-header {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: #222;
+            padding-right: 20px;
+        }
+
+        .btn-calculate-action {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-calculate-action.sent-status {
+            background-color: #d9534f;
+        }
+
+        .calc-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .calc-input {
+            width: 55px;
+            padding: 4px;
+            font-size: 11px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            text-align: center;
+        }
+
+        .calc-output-text {
+            font-size: 18px; 
+            font-weight: 900; 
+            color: #003a70;
+            margin-left: auto;
+            text-align: right;
+            line-height: 1.2;
+        }
+
+        .calc-output-try {
+            color: #28a745; 
+            font-size: 15px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .rate-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #eef2f7;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border: 1px dashed #003a70;
+            gap: 8px;
+        }
+
+        .rate-input {
+            width: 75px;
+            padding: 5px;
+            font-size: 13px;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .btn-tcmb-link {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            font-size: 11px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .action-mode-group {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .btn-mode {
+            flex: 1;
+            padding: 8px 4px;
+            font-size: 11px;
+            font-weight: bold;
+            border: 1px solid #003a70;
+            background-color: #fff;
+            color: #003a70;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn-mode.active {
+            background-color: #ff9900;
+            color: #fff;
+            border-color: #ff9900;
+        }
+
+        .btn-grand-calc {
+            width: 100%;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .sorted-header {
+            font-size: 13px;
+            font-weight: bold;
+            color: #28a745;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 2px solid #28a745;
+            text-transform: uppercase;
+        }
+
+        .report-detail-line {
+            font-size: 11px;
+            color: #444;
+            background: #fff;
+            padding: 6px;
+            border-radius: 4px;
+            margin-top: 5px;
+            border: 1px solid #e2e8f0;
+            line-height: 1.5;
+        }
+        .report-detail-line strong {
+            color: #333;
+        }
+
+        .calc-total-summary {
+            padding: 12px;
+            background: #003a70;
+            color: white;
+            border-radius: 6px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 16px;
+            line-height: 1.4;
+            margin-top: 10px;
+        }
+
+        .tl-text {
+            color: #ffcc00;
+            font-size: 15px;
+        }
+
+        .no-data-msg {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        .communication-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 5px;
+        }
+
+        .customer-input-panel {
+            background: #f8fafc;
+            border: 1px dashed #003a70;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .customer-row-fields {
+            display: flex;
+            gap: 8px;
+        }
+
+        .customer-field-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .customer-field-group label {
+            font-size: 11px;
+            font-weight: bold;
+            color: #003a70;
+        }
+
+        .customer-input {
+            width: 100%;
+            padding: 6px 8px;
+            font-size: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .customer-input:focus {
+            border-color: #003a70;
+        }
+
+        .comm-header {
+            font-size: 14px;
+            font-weight: bold;
+            color: #003a70;
+            text-align: center;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+        }
+
+        .text-preview-area {
+            width: 100%;
+            height: 320px; 
+            padding: 12px;
+            font-size: 11px;
+            border: 1px solid #003a70;
+            border-radius: 6px;
+            background-color: #fafafa;
+            resize: none;
+            font-family: 'Courier New', Courier, monospace;
+            color: #222;
+            line-height: 1.4;
+            outline: none;
+        }
+
+        .btn-copy-action {
+            width: 100%;
+            background-color: #003a70;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            text-transform: uppercase;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .btn-email-action {
+            width: 100%;
+            background-color: #e67e22; 
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            text-transform: uppercase;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .btn-whatsapp {
+            width: 100%;
+            background-color: #25D366;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            text-transform: uppercase;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+
+        .bottom-nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            padding: 10px;
+            gap: 10px;
+            z-index: 999;
+        }
+
+        .nav-arrow-btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 13px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background-color: #4a5568;
+            color: white;
+            transition: background-color 0.2s;
+        }
+
+        .nav-arrow-btn:disabled {
+            background-color: #cbd5e1;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(0, 58, 112, 0.95);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    
+#page1{background:#eef7ff;}
+#page2{background:#fff8ef;}
+#page3{background:#f3fff1;}
+#page4{background:#f7f7f7;}
+
+
+#tabBtn1{background:#003a70;color:#fff;}
+#basketTabBtn{background:#ff9900;color:#fff;}
+#tabBtn3{background:#28a745;color:#fff;}
+#tabBtn4{background:#6c757d;color:#fff;}
+.tab-btn.active{filter:brightness(0.9);}
+
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast-notification">İşlem Başarılı</div>
+
+<div class="phone-container">
+    <div class="app-header">WEICON ASİST</div>
+    
+    <div class="nav-tabs">
+        <button class="tab-btn active" id="tabBtn1" onclick="switchTab(1)">Ürün Bul</button>
+        <button class="tab-btn" id="basketTabBtn" onclick="switchTab(2)">Sepet + Hesaplama (0)</button>
+        <button class="tab-btn" id="tabBtn3" onclick="switchTab(3)" style="display:none;">Hesapla</button>
+        <button class="tab-btn" id="tabBtn4" onclick="switchTab(4)">İletişim</button>
+    </div>
+
+    <!-- SAYFA 1 -->
+    <div id="page1" class="content-page active">
+        <div class="page-info">Sayfa 1: Ürün Bul</div>
+        <div class="step-label">[İşlem 1.1] Ürün Arama ve Filtreleme</div>
+        <div class="search-box-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Arama yapın... (Örn: Asw)" value="Asw">
+        </div>
+        <button class="btn-primary" id="searchBtn">ÜRÜNÜ BUL</button>
+        <div class="step-label">[İşlem 1.2] Kalıcı Hafıza JSON Yükleme</div>
+        <div class="btn-update-container">
             <label for="jsonFileInput" class="btn-secondary">Listeyi Güncelle (.json)</label>
             <input type="file" id="jsonFileInput" accept=".json">
         </div>
