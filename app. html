@@ -1,1 +1,440 @@
 
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WEICON ASİST</title>
+<style>
+*{box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:0;}
+body{background-color:#f5f7fa;color:#333;padding:10px;display:flex;justify-content:center;}
+.phone-container{width:100%;max-width:480px;background:#ffffff;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.1);min-height:100vh;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+.app-header{text-align:center;padding:15px 10px 5px;font-size:20px;font-weight:bold;color:#003a70;}
+.nav-tabs{display:flex;padding:10px;gap:5px;}
+.tab-btn{flex:1;padding:10px 3px;font-size:11px;font-weight:600;border:none;border-radius:4px;cursor:pointer;text-align:center;background-color:#bcbcbc;color:#333;}
+.tab-btn.active{filter:brightness(0.85);}
+#tabBtn1{background:#003a70;color:#fff;}
+#basketTabBtn{background:#ff9900;color:#fff;}
+#tabBtn3{background:#28a745;color:#fff;}
+#tabBtn4{background:#6c757d;color:#fff;}
+.content-page{padding:10px;flex:1;display:none;margin-bottom:65px;}
+.content-page.active{display:flex;flex-direction:column;}
+#page1{background:#eef7ff;}#page2{background:#fff8ef;}#page3{background:#f3fff1;}#page4{background:#f7f7f7;}
+.page-info{text-align:center;font-size:12px;color:#666;margin-bottom:8px;font-weight:bold;}
+.step-label{display:inline-block;background:#e2e8f0;color:#4a5568;font-size:10px;font-weight:bold;padding:2px 6px;border-radius:4px;margin-bottom:6px;text-transform:uppercase;}
+.search-box-container{border:1px solid #999;border-radius:6px;padding:5px;margin-bottom:10px;background:#fff;}
+.search-input{width:100%;border:none;outline:none;padding:8px;font-size:18px;}
+.btn-primary{width:100%;background-color:#003a70;color:white;border:none;padding:12px;font-size:14px;font-weight:bold;letter-spacing:1px;border-radius:4px;cursor:pointer;margin-bottom:12px;text-transform:uppercase;}
+.btn-update-container{text-align:right;margin-bottom:10px;}
+.data-table-container{overflow-x:auto;}
+.data-table{width:100%;border-collapse:collapse;table-layout:fixed;}
+.data-table th{background-color:#003a70;color:white;font-size:11px;font-weight:bold;padding:6px 4px;text-align:left;}
+.col-kodlar{width:25%;}.col-urun{width:49%;}.col-euro{width:14%;}.col-islem{width:12%;}
+.data-table td{padding:6px 4px;font-size:11px;border-bottom:1px solid #e0e0e0;vertical-align:middle;}
+.kod-container{font-size:10px;color:#555;line-height:1.3;}
+.kod-b{color:#003a70;font-weight:bold;}.kod-a{color:#d9534f;font-weight:bold;}
+.product-cell{font-weight:500;color:#222;word-break:break-word;}
+.price-tag{background-color:#e8f4fd;color:#003a70;padding:2px 4px;border-radius:4px;font-weight:bold;display:inline-block;}
+.btn-add{background-color:#003a70;color:white;border:none;padding:6px 4px;font-size:10px;border-radius:3px;cursor:pointer;width:100%;text-align:center;font-weight:bold;}
+.btn-add.added{background-color:#d9534f!important;}
+.placeholder-page{text-align:center;padding:20px;color:#666;font-size:13px;}
+.list-item-block{background:#f8f9fa;border:1px solid #ddd;border-radius:6px;padding:10px;margin-bottom:8px;position:relative;}
+.btn-item-remove{position:absolute;top:8px;right:8px;background-color:#d9534f;color:white;border:none;padding:3px 8px;font-size:10px;font-weight:bold;border-radius:4px;cursor:pointer;z-index:1;}
+.basket-item-flex{display:flex;justify-content:space-between;align-items:center;padding-right:45px;}
+.list-item-header{font-size:12px;font-weight:bold;margin-bottom:4px;color:#222;padding-right:55px;}
+.btn-calculate-action{background-color:#28a745;color:white;border:none;padding:6px 10px;font-size:11px;font-weight:bold;border-radius:4px;cursor:pointer;}
+.rate-container{display:flex;align-items:center;justify-content:space-between;background:#eef2f7;padding:10px 12px;border-radius:6px;margin-bottom:12px;border:1px dashed #003a70;gap:8px;}
+.rate-input{width:75px;padding:5px;font-size:13px;border:1px solid #aaa;border-radius:4px;text-align:center;font-weight:bold;}
+.btn-tcmb-link{background-color:#6c757d;color:white;border:none;padding:6px 10px;font-size:11px;border-radius:4px;cursor:pointer;font-weight:bold;}
+.action-mode-group{display:flex;gap:6px;margin-bottom:12px;}
+.btn-mode{flex:1;padding:8px 4px;font-size:11px;font-weight:bold;border:1px solid #003a70;background-color:#fff;color:#003a70;border-radius:4px;cursor:pointer;text-transform:uppercase;}
+.btn-mode.active{background-color:#ff9900;color:#fff;border-color:#ff9900;}
+.calc-input-sm{width:60px;padding:4px 6px;font-size:13px;font-weight:bold;border:2px solid #003a70;border-radius:4px;text-align:center;background:#fff;}
+.hesap-karti{background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px;margin-bottom:8px;position:relative;border-left:4px solid #ff9900;}
+.hesap-karti-baslik{font-size:12px;font-weight:bold;color:#003a70;margin-bottom:6px;padding-right:50px;}
+.hesap-karti-kodlar{font-size:10px;color:#555;margin-bottom:8px;}
+.hesap-satir{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:4px;}
+.hesap-satir label{font-size:11px;color:#555;font-weight:bold;}
+.hesap-degerleri{background:#eef7ff;border-radius:6px;padding:8px;margin-top:6px;}
+.hesap-deger-satir{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #e0e0e0;}
+.hesap-deger-satir:last-child{border-bottom:none;}
+.hesap-deger-satir span:first-child{font-size:10px;color:#666;}
+.hesap-deger-satir span:last-child{font-size:12px;font-weight:bold;color:#003a70;}
+.hesap-toplam-blok{background:#003a70;color:white;border-radius:6px;padding:10px;margin-top:8px;text-align:right;}
+.hesap-toplam-blok .eur{font-size:20px;font-weight:900;}
+.hesap-toplam-blok .tl{color:#ffcc00;font-size:16px;font-weight:bold;}
+.hesap-toplam-blok .kdv{color:#90ee90;font-size:13px;margin-top:2px;}
+.hesap-toplam-blok .prim{color:#ffd700;font-size:11px;margin-top:4px;border-top:1px solid rgba(255,255,255,0.3);padding-top:4px;}
+.btn-aktar{width:100%;background-color:#003a70;color:white;border:none;padding:12px;font-size:13px;font-weight:bold;border-radius:4px;cursor:pointer;margin-top:8px;text-transform:uppercase;}
+.no-data-msg{text-align:center;color:#888;padding:20px;font-size:12px;font-style:italic;}
+.customer-input-panel{background:#f8fafc;border:1px dashed #003a70;border-radius:8px;padding:10px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;}
+.customer-row-fields{display:flex;gap:8px;}
+.customer-field-group{flex:1;display:flex;flex-direction:column;gap:4px;}
+.customer-field-group label{font-size:11px;font-weight:bold;color:#003a70;}
+.customer-input{width:100%;padding:6px 8px;font-size:12px;border:1px solid #cbd5e1;border-radius:4px;outline:none;}
+.comm-header{font-size:14px;font-weight:bold;color:#003a70;text-align:center;margin-bottom:6px;text-transform:uppercase;}
+.text-preview-area{width:100%;height:300px;padding:12px;font-size:11px;border:1px solid #003a70;border-radius:6px;background:#fafafa;resize:none;font-family:'Courier New',monospace;color:#222;line-height:1.4;outline:none;}
+.btn-copy-action{width:100%;background-color:#003a70;color:white;border:none;padding:12px;font-size:13px;font-weight:bold;border-radius:6px;cursor:pointer;margin-bottom:6px;text-transform:uppercase;}
+.btn-email-action{width:100%;background-color:#e67e22;color:white;border:none;padding:12px;font-size:13px;font-weight:bold;border-radius:6px;cursor:pointer;margin-bottom:6px;text-transform:uppercase;}
+.btn-whatsapp{width:100%;background-color:#25D366;color:white;border:none;padding:12px;font-size:13px;font-weight:bold;border-radius:6px;cursor:pointer;text-transform:uppercase;}
+.bottom-nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#ffffff;border-top:1px solid #e2e8f0;display:flex;padding:10px;gap:10px;z-index:999;}
+.nav-arrow-btn{flex:1;padding:12px;font-size:13px;font-weight:bold;border:none;border-radius:6px;cursor:pointer;background-color:#4a5568;color:white;}
+.nav-arrow-btn:disabled{background-color:#cbd5e1;color:#94a3b8;cursor:not-allowed;}
+.toast-notification{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(0,58,112,0.95);color:white;padding:12px 24px;border-radius:30px;font-size:13px;font-weight:bold;z-index:9999;opacity:0;transition:all 0.3s ease;pointer-events:none;white-space:nowrap;}
+.toast-notification.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div id="toast" class="toast-notification">İşlem Başarılı</div>
+<div class="phone-container">
+<div class="app-header">WEICON ASİST</div>
+<div class="nav-tabs">
+<button class="tab-btn active" id="tabBtn1" onclick="switchTab(1)">Ürün Bul</button>
+<button class="tab-btn" id="basketTabBtn" onclick="switchTab(2)">Sepet (0)</button>
+<button class="tab-btn" id="tabBtn3" onclick="switchTab(3)">Hesapla</button>
+<button class="tab-btn" id="tabBtn4" onclick="switchTab(4)">İletişim</button>
+</div>
+<div id="page1" class="content-page active">
+<div class="page-info">Sayfa 1: Ürün Bul</div>
+<div class="step-label">[1.1] Ürün Arama</div>
+<div class="search-box-container"><input type="text" id="searchInput" class="search-input" placeholder="Ürün adı veya kod..."></div>
+<button class="btn-primary" id="searchBtn">ÜRÜNÜ BUL</button>
+<div class="step-label">[1.2] JSON Güncelle</div>
+<div class="btn-update-container">
+<label style="display:inline-block;background:#6c757d;color:white;padding:6px 14px;font-size:11px;border-radius:4px;cursor:pointer;font-weight:bold;">Listeyi Güncelle (.json)<input type="file" accept=".json" onchange="processJsonUpload(event)" style="position:absolute;left:-9999px;opacity:0;width:1px;height:1px;"></label>
+</div>
+<div class="data-table-container">
+<table class="data-table">
+<thead><tr><th class="col-kodlar">KODLAR</th><th class="col-urun">ÜRÜN</th><th class="col-euro">EURO</th><th class="col-islem">İŞLEM</th></tr></thead>
+<tbody id="productTableBody"></tbody>
+</table>
+<div id="noDataPlaceholder" class="no-data-msg" style="display:none;">Ürün bulunamadı.</div>
+</div>
+</div>
+<div id="page2" class="content-page">
+<div class="page-info">Sayfa 2: Sepet</div>
+<div class="step-label">[2.1] Sepetteki Ürünler</div>
+<div id="basketItemsContainer" style="padding:5px;"></div>
+<div id="emptyBasketMsg" class="placeholder-page">Sepetiniz boş. Ürün Bul sayfasından ekleyin.</div>
+</div>
+<div id="page3" class="content-page">
+<div class="page-info">Sayfa 3: Hesaplama</div>
+<div class="rate-container">
+<div><span style="font-size:11px;font-weight:bold;color:#003a70;display:block;">TCMB Euro Kuru:</span>
+<input type="number" id="euroRateInput" class="rate-input" value="53.59" step="0.01" oninput="yenidenHesapla()"></div>
+<button class="btn-tcmb-link" onclick="openTCMBPage()">TCMB Kontrol</button>
+</div>
+<div class="action-mode-group">
+<button id="modeBtn-satis" class="btn-mode active" onclick="setMode('satis')">Satış</button>
+<button id="modeBtn-proforma" class="btn-mode" onclick="setMode('proforma')">Proforma</button>
+<button id="modeBtn-teklif" class="btn-mode" onclick="setMode('teklif')">Fiyat Teklifi</button>
+</div>
+<div id="hesapListesi" style="padding:2px;"></div>
+<div id="emptyHesapMsg" class="placeholder-page" style="display:block;">Sepetten ürün gönderin.</div>
+<div id="genelToplamBlok" style="display:none;">
+<div class="hesap-toplam-blok">
+<div style="font-size:11px;color:#aaa;margin-bottom:4px;">GENEL TOPLAM</div>
+<div class="eur">€ <span id="gtEUR">0.00</span></div>
+<div class="tl">₺ <span id="gtTL">0.00</span> <span style="font-size:10px;font-weight:normal;">(KDV hariç)</span></div>
+<div class="kdv">₺ <span id="gtKDV">0.00</span> <span style="font-size:10px;font-weight:normal;">(KDV dahil %20)</span></div>
+<div class="prim">Müdür Prim Toplamı: ₺ <span id="gtPrim">0.00</span></div>
+</div>
+<button class="btn-aktar" onclick="transferToPage4()">4. SAYFAYA AKTAR →</button>
+</div>
+</div>
+<div id="page4" class="content-page">
+<div class="step-label">[4.1] Müşteri Bilgileri</div>
+<div class="customer-input-panel">
+<div class="customer-field-group"><label>Müşteri Adı:</label><input type="text" id="custNameInput" class="customer-input" value="HİTİT MAKİNA - ÇORUM" oninput="generateComm()"></div>
+<div class="customer-row-fields">
+<div class="customer-field-group"><label>Vade:</label><input type="text" id="custVadeInput" class="customer-input" value="45 gün" oninput="generateComm()"></div>
+<div class="customer-field-group"><label>Fatura:</label><input type="text" id="custFaturaInput" class="customer-input" value="EURO fatura" oninput="generateComm()"></div>
+</div>
+</div>
+<div id="emptyCommMsg" class="placeholder-page" style="display:block;">Önce 3. sayfada hesaplama yapın.</div>
+<div id="communicationBlock" style="display:none;flex-direction:column;gap:8px;">
+<div class="comm-header">Müşteri Paylaşım Paneli</div>
+<textarea id="emailTemplateTextarea" class="text-preview-area" readonly></textarea>
+<button class="btn-copy-action" onclick="copyText()">Metni Kopyala</button>
+<button class="btn-email-action" onclick="sendEmail()">E-Posta Gönder</button>
+<button class="btn-whatsapp" onclick="sendWhatsApp()">WhatsApp İle Gönder</button>
+</div>
+</div>
+<div class="bottom-nav-bar">
+<button id="prevBarBtn" class="nav-arrow-btn" onclick="navigatePage(-1)">< GERİ</button>
+<button id="nextBarBtn" class="nav-arrow-btn" onclick="navigatePage(1)">İLERİ ></button>
+</div>
+</div><script>
+let globalProductCatalog=[];
+let basket=[];
+let hesapListesi=[];
+let currentMode="satis";
+let activePage=1;
+const STORAGE_KEY="wemosa_catalog_v2";
+const demoCatalog=[{"berta":"11000400","abas":"10000016","name":"Çinko Sprey 400ml","price":20.1},{"berta":"13550425","abas":"10023569","name":"Primer P 400 250ml","price":61.8}];
+
+document.addEventListener("DOMContentLoaded",function(){
+loadCatalog();
+document.getElementById('searchBtn').addEventListener('click',performFilter);
+document.getElementById('searchInput').addEventListener('input',performFilter);
+updateNavBtns();
+});
+
+function showToast(m){const t=document.getElementById("toast");t.innerText=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500);}
+function navigatePage(d){let t=activePage+d;if(t>=1&&t<=4)switchTab(t);}
+function updateNavBtns(){document.getElementById('prevBarBtn').disabled=(activePage===1);document.getElementById('nextBarBtn').disabled=(activePage===4);}
+
+function switchTab(n){
+activePage=n;updateNavBtns();
+document.querySelectorAll('.content-page').forEach(p=>p.classList.remove('active'));
+document.querySelectorAll('.nav-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+document.getElementById('page'+n).classList.add('active');
+const ids=['tabBtn1','basketTabBtn','tabBtn3','tabBtn4'];
+document.getElementById(ids[n-1]).classList.add('active');
+if(n===2)renderBasket();
+if(n===3)renderHesap();
+if(n===4)generateComm();
+if(n===1)performFilter();
+}
+
+function loadCatalog(){
+try{const s=localStorage.getItem(STORAGE_KEY);if(s){globalProductCatalog=JSON.parse(s);performFilter();return;}}catch(e){}
+globalProductCatalog=demoCatalog;performFilter();
+}
+
+function processJsonUpload(event){
+const file=event.target.files[0];if(!file)return;
+const reader=new FileReader();
+reader.onload=function(e){
+try{
+const p=JSON.parse(e.target.result);
+if(Array.isArray(p)){globalProductCatalog=p;try{localStorage.setItem(STORAGE_KEY,JSON.stringify(p));}catch(err){}showToast(p.length+" ürün yüklendi!");performFilter();}
+else showToast("Geçersiz JSON formatı.");
+}catch(err){showToast("JSON okunamadı.");}
+};
+reader.readAsText(file);
+}
+
+function performFilter(){
+const q=document.getElementById('searchInput').value.trim().toLowerCase();
+const tb=document.getElementById('productTableBody');
+const ph=document.getElementById('noDataPlaceholder');
+tb.innerHTML="";
+if(!globalProductCatalog||globalProductCatalog.length===0){ph.style.display="block";return;}
+const m=globalProductCatalog.filter(item=>{
+const b=(item.berta||item.BERTA||'').toString().toLowerCase();
+const a=(item.abas||item.ABAS||'').toString().toLowerCase();
+const n=(item.name||item.NAME||item.urun||'').toString().toLowerCase();
+return b.includes(q)||a.includes(q)||n.includes(q);
+});
+if(m.length===0){ph.style.display="block";return;}
+ph.style.display="none";
+m.forEach((item,index)=>{
+const tr=document.createElement('tr');
+let bt=(item.berta||item.BERTA||'').toString();
+let at=(item.abas||item.ABAS||'').toString();
+let nt=item.name||item.NAME||item.urun||'';
+let pt=item.price||item.PRICE||item.euro||0;
+if(bt.toLowerCase()==='nan')bt='';if(at.toLowerCase()==='nan')at='';
+let cp=parseFloat(pt.toString().replace(',','.'))||0;
+const id=bt||at||('idx'+index);
+const sn=nt.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+const inBasket=basket.find(i=>i.id===id);
+tr.innerHTML='<td><div class="kod-container"><span class="kod-b">B:</span>'+bt+'<br><span class="kod-a">A:</span>'+at+'</div></td>'
++'<td class="product-cell">'+nt+'</td>'
++'<td><span class="price-tag">'+cp.toFixed(2)+' €</span></td>'
++'<td><button class="btn-add'+(inBasket?' added':'')+'" onclick="addToBasket(\''+id+'\',\''+sn+'\','+cp+',\''+bt+'\',\''+at+'\')">'+(inBasket?'EKLENDİ':'Ekle')+'</button></td>';
+tb.appendChild(tr);
+});
+}
+
+function addToBasket(id,name,price,berta,abas){
+if(basket.find(i=>i.id===id)){showToast("Zaten sepette.");return;}
+basket.push({id,name,price:parseFloat(price)||0,berta,abas,quantity:1});
+updateBasketCount();
+document.querySelectorAll('.btn-add').forEach(btn=>{
+const oc=btn.getAttribute('onclick')||'';
+if(oc.includes("'"+id+"'")){btn.classList.add('added');btn.innerText='EKLENDİ';}
+});
+showToast(name+" sepete eklendi.");
+}
+
+function updateBasketCount(){document.getElementById('basketTabBtn').innerText='Sepet ('+basket.length+')';}
+
+function removeFromBasket(id){
+basket=basket.filter(i=>i.id!==id);
+hesapListesi=hesapListesi.filter(i=>i.id!==id);
+updateBasketCount();renderBasket();showToast("Sepetten silindi.");
+}
+
+function renderBasket(){
+const c=document.getElementById('basketItemsContainer');
+const e=document.getElementById('emptyBasketMsg');
+c.innerHTML="";
+if(basket.length===0){e.style.display="block";return;}
+e.style.display="none";
+basket.forEach(item=>{
+const div=document.createElement('div');div.className="list-item-block";
+const sn=item.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+const already=hesapListesi.find(i=>i.id===item.id);
+div.innerHTML='<button class="btn-item-remove" onclick="removeFromBasket(\''+item.id+'\')">Sil</button>'
++'<div class="basket-item-flex"><div>'
++'<div class="list-item-header">'+item.name+'</div>'
++'<div class="kod-container" style="margin-bottom:5px;"><span class="kod-b">B:</span> '+(item.berta||'-')+' | <span class="kod-a">A:</span> '+(item.abas||'-')+'</div>'
++'<div>Liste Fiyat: <span class="price-tag">'+item.price.toFixed(2)+' €</span></div>'
++'</div><div style="margin-top:4px;">'
++'<button style="background:'+(already?'#d9534f':'#28a745')+';color:white;border:none;padding:8px 10px;font-size:11px;font-weight:bold;border-radius:4px;cursor:pointer;" onclick="sendToHesap(\''+item.id+'\',\''+sn+'\','+item.price+',\''+item.berta+'\',\''+item.abas+'\')">'+(already?'Gönderildi ✓':'Hesapla →')+'</button>'
++'</div></div>';
+c.appendChild(div);
+});
+}
+
+function sendToHesap(id,name,price,berta,abas){
+if(hesapListesi.find(i=>i.id===id)){showToast("Zaten hesaplama listesinde.");return;}
+hesapListesi.push({id,name,price:parseFloat(price)||0,berta,abas,quantity:1,iskonto:0});
+showToast(name+" hesaplamaya eklendi.");
+renderBasket();
+}
+
+function removeFromHesap(id){
+hesapListesi=hesapListesi.filter(i=>i.id!==id);
+renderHesap();showToast("Hesaplama listesinden silindi.");
+}
+
+function setMode(m){
+currentMode=m;
+document.querySelectorAll('.btn-mode').forEach(b=>b.classList.remove('active'));
+document.getElementById('modeBtn-'+m).classList.add('active');
+renderHesap();
+}
+
+function updateHesap(id,tip,val){
+const item=hesapListesi.find(i=>i.id===id);if(!item)return;
+if(tip==='adet')item.quantity=Math.max(1,parseInt(val)||1);
+if(tip==='isk'){let d=parseFloat(val)||0;if(d<0)d=0;if(d>100)d=100;item.iskonto=d;}
+renderHesap();
+setTimeout(()=>{
+const el=document.getElementById((tip==='adet'?'adet':'isk')+'-'+id);
+if(el){const v=el.value;el.focus();el.setSelectionRange(v.length,v.length);}
+},30);
+}
+
+function yenidenHesapla(){renderHesap();}
+function openTCMBPage(){window.open("https://www.tcmb.gov.tr/wps/wcm/connect/tr/tcmb+tr/main+page+site+area/bugun","_blank");}
+function transferToPage4(){if(hesapListesi.length===0){showToast("Aktarılacak ürün yok.");return;}switchTab(4);showToast("4. Sayfaya aktarıldı!");}
+</script>
+<script>
+function renderHesap(){
+const c=document.getElementById('hesapListesi');
+const e=document.getElementById('emptyHesapMsg');
+const gt=document.getElementById('genelToplamBlok');
+c.innerHTML="";
+if(hesapListesi.length===0){e.style.display="block";gt.style.display="none";return;}
+e.style.display="none";
+const kur=parseFloat(document.getElementById('euroRateInput').value)||1;
+let topEUR=0,topTLkdvsiz=0,topKDV=0,topPrim=0;
+hesapListesi.forEach(item=>{
+const lf=item.price;
+const isk=item.iskonto||0;
+const adet=item.quantity||1;
+const iskBirim=lf*(1-isk/100);
+const tlBirim=iskBirim*kur;
+const tEUR=iskBirim*adet;
+const tTL=tEUR*kur;
+const tKDV=tTL*1.20;
+const prim=iskBirim*0.08915*adet*kur;
+topEUR+=tEUR;topTLkdvsiz+=tTL;topKDV+=tKDV;topPrim+=prim;
+const div=document.createElement('div');
+div.className="hesap-karti";
+div.innerHTML='<button class="btn-item-remove" onclick="removeFromHesap(\''+item.id+'\')">Sil</button>'
++'<div class="hesap-karti-baslik">'+item.name+'</div>'
++'<div class="hesap-karti-kodlar"><span class="kod-b">B:</span> '+(item.berta||'-')+' | <span class="kod-a">A:</span> '+(item.abas||'-')+'</div>'
++'<div class="hesap-satir">'
++'<label>Adet:</label>'
++'<input type="number" class="calc-input-sm" id="adet-'+item.id+'" value="'+adet+'" min="1" onchange="updateHesap(\''+item.id+'\',\'adet\',this.value)">'
++'<label>İskonto (%):</label>'
++'<input type="number" class="calc-input-sm" id="isk-'+item.id+'" value="'+isk+'" min="0" max="100" onchange="updateHesap(\''+item.id+'\',\'isk\',this.value)">'
++'</div>'
++'<div class="hesap-degerleri">'
++'<div class="hesap-deger-satir"><span>Liste Fiyatı:</span><span>'+lf.toFixed(2)+' €</span></div>'
++'<div class="hesap-deger-satir"><span>İsk. Birim Fiyat:</span><span>'+iskBirim.toFixed(2)+' € / '+tlBirim.toFixed(2)+' ₺</span></div>'
++'<div class="hesap-deger-satir"><span>Toplam (KDV hariç):</span><span>'+tEUR.toFixed(2)+' € / '+tTL.toFixed(2)+' ₺</span></div>'
++'<div class="hesap-deger-satir" style="background:#fffbe6;"><span>KDV Dahil (%20):</span><span style="color:#e67e22;font-weight:bold;">'+tKDV.toFixed(2)+' ₺</span></div>'
++'<div class="hesap-deger-satir" style="background:#f0fff0;"><span>Müdür Prim (%8.915):</span><span style="color:#28a745;">'+prim.toFixed(2)+' ₺</span></div>'
++'</div>';
+c.appendChild(div);
+});
+document.getElementById('gtEUR').innerText=topEUR.toFixed(2);
+document.getElementById('gtTL').innerText=topTLkdvsiz.toFixed(2);
+document.getElementById('gtKDV').innerText=topKDV.toFixed(2);
+document.getElementById('gtPrim').innerText=topPrim.toFixed(2);
+gt.style.display="block";
+}
+
+function getModeLabel(){
+if(currentMode==='satis')return"SİPARİŞ";
+if(currentMode==='proforma')return"PROFORMA FATURA";
+return"FİYAT TEKLİFİ";
+}
+
+function buildEmailBody(){
+const kur=parseFloat(document.getElementById('euroRateInput').value)||1;
+const cn=document.getElementById('custNameInput').value.trim()||"Müşteri";
+const cv=document.getElementById('custVadeInput').value.trim()||"30";
+const cf=document.getElementById('custFaturaInput').value.trim()||"TL";
+const lm=getModeLabel();
+let t="Merhaba,\n\n"+cn+" firması için "+lm+" işlemini rica ederim.\n\n";
+t+="MÜŞTERİ BİLGİLERİ:\n--------------------------------------------------\n";
+t+="Müşteri: "+cn+"\nVade: "+cv+" | Fatura: "+cf+"\n--------------------------------------------------\n\n";
+t+="ÜRÜN LİSTESİ:\n--------------------------------------------------\n";
+hesapListesi.forEach(item=>{
+const iskBirim=item.price*(1-item.iskonto/100);
+const tKDV=iskBirim*item.quantity*kur*1.20;
+t+=(item.berta||'-')+" | "+(item.abas||'-')+" | "+item.name+" | "+item.quantity+" Adet | "+iskBirim.toFixed(2)+" € | "+tKDV.toFixed(2)+" ₺ (KDV dahil)\n";
+});
+t+="--------------------------------------------------\n\nAbdullah KARAMAN";
+return t;
+}
+
+function generateComm(){
+const em=document.getElementById('emptyCommMsg');
+const cb=document.getElementById('communicationBlock');
+const ta=document.getElementById('emailTemplateTextarea');
+if(hesapListesi.length===0){em.style.display="block";cb.style.display="none";return;}
+em.style.display="none";cb.style.display="flex";
+const lm=getModeLabel();
+const cn=document.getElementById('custNameInput').value.trim()||"Müşteri";
+ta.value="Gönderen: akaraman3406@gmail.com\nAlıcı: ofis@weicon.com.tr\nKonu: "+lm+" - "+cn+"\n\n"+buildEmailBody();
+}
+
+function copyText(){
+const ta=document.getElementById('emailTemplateTextarea');
+ta.select();ta.setSelectionRange(0,99999);
+try{navigator.clipboard.writeText(ta.value);}catch(e){document.execCommand('copy');}
+showToast("Kopyalandı!");
+}
+
+function sendEmail(){
+const lm=getModeLabel();
+const cn=document.getElementById('custNameInput').value.trim()||"Müşteri";
+window.location.href="mailto:ofis@weicon.com.tr?subject="+encodeURIComponent(lm+" - "+cn)+"&body="+encodeURIComponent(buildEmailBody());
+}
+
+function sendWhatsApp(){
+const kur=parseFloat(document.getElementById('euroRateInput').value)||1;
+const lm=getModeLabel();
+const cn=document.getElementById('custNameInput').value.trim()||"Müşteri";
+const cv=document.getElementById('custVadeInput').value.trim();
+const cf=document.getElementById('custFaturaInput').value.trim();
+let t="*** "+lm+" ***\n\nMerhaba,\n"+cn+" firması için "+lm+" işlemini rica ederim.\n_____________________\n\nFİRMA: "+cn+"\nVADE: "+cv+" | FATURA: "+cf+"\n_____________________\n\nÜRÜNLER:\n";
+hesapListesi.forEach(item=>{
+const iskBirim=item.price*(1-item.iskonto/100);
+const tKDV=iskBirim*item.quantity*kur*1.20;
+t+=(item.berta||'-')+" | "+item.name+" | "+item.quantity+" Adet | "+iskBirim.toFixed(2)+" € | "+tKDV.toFixed(2)+" ₺\n";
+});
+t+="\nİyi çalışmalar.\nAbdullah KARAMAN";
+window.open("https://api.whatsapp.com/send?text="+encodeURIComponent(t),"_blank");
+}
+</script>
+</body>
+</html>
